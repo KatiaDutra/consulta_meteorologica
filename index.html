@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Consulta do Tempo</title>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+	
+	<header class="cabecalho">
+		<h1 class="cabecalho__titulo">Consulta do Tempo</h1>
+		<p class="cabecalho__subtitulo">Condições atuais e previsão para os próximos 5 dias</p>
+	</header>
+
+	<main class="layout">
+		
+		<div class="coluna coluna--busca">
+			
+			<section class="area" id="area-busca" aria-labelledby="titulo-busca">
+				<h2 class="area__titulo" id="titulo-busca">Pesquisar cidade</h2>
+				<form id="form-busca" class="busca" novalidate>
+					<label for="campo-cidade" class="busca__rotulo">Nome da cidade</label>
+					<div class="busca__linha">
+						<input type="text" id="campo-cidade" class="busca__campo"
+							placeholder="Ex.: Porto Alegre" autocomplete="off">
+						<button type="submit" id="botao-buscar" class="botao">Buscar</button>
+					</div>
+				</form>
+			</section>
+
+			<p id="mensagem" class="mensagem mensagem--info" role="status" aria-live="polite">
+				Pesquise uma cidade para começar.
+			</p>
+
+			<section class="area" id="area-resultados" aria-labelledby="titulo-resultados">
+				<h2 class="area__titulo" id="titulo-resultados">Localidades encontradas</h2>
+				<div id="resultados">
+					<p class="vazio">Os resultados da pesquisa aparecem aqui.</p>
+				</div>
+			</section>
+
+			<section class="area" id="area-favoritos" aria-labelledby="titulo-favoritos">
+				<h2 class="area__titulo" id="titulo-favoritos">Cidades favoritas</h2>
+				<div id="favoritos">
+					<p class="vazio">Nenhuma cidade favorita ainda.</p>
+				</div>
+			</section>
+		</div>
+
+		<div class="coluna coluna--clima">
+
+			<section class="area area--destaque" id="area-atual" aria-labelledby="titulo-atual">
+				<h2 class="area__titulo" id="titulo-atual">Tempo agora</h2>
+				<div id="tempo-atual">
+					<p class="vazio">Selecione uma cidade para ver as condições atuais.</p>
+				</div>
+			</section>
+
+			<section class="area" id="area-previsao" aria-labelledby="titulo-previsao">
+				<h2 class="area__titulo" id="titulo-previsao">Próximos 5 dias</h2>
+				<div id="previsao">
+					<p class="vazio">A previsão aparece depois que você selecionar uma cidade.</p>
+				</div>
+			</section>
+		</div>
+	</main>
+
+	<footer class="rodape">
+		<p>
+			Dados meteorológicos fornecidos por
+			<a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>
+			(licença <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>).
+		</p>
+	</footer>
+
+	<script src="js/script.js"></script>
+</body>
+</html>
