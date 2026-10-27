@@ -194,3 +194,51 @@ h1, h2, h3, p {
 .rodape a {
 	color: var(--tinta);
 }
+
+/* =========================================================
+   Etapa 2 – Lista de localidades encontradas
+   ========================================================= */
+.lista-resultados {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+/* Cada resultado é um botão, para funcionar com mouse e teclado */
+.resultado {
+	display: block;
+	width: 100%;
+	padding: 0.6rem 0.75rem;
+	font: inherit;
+	color: inherit;
+	text-align: left;
+	background-color: #fff;
+	border: 2px solid transparent;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.resultado:hover {
+	border-color: var(--chuva);
+}
+
+/* Destaca a localidade selecionada */
+.resultado[aria-pressed="true"] {
+	border-color: var(--tinta);
+	background-color: var(--ceu);
+}
+
+.resultado__nome {
+	display: block;
+	font-weight: 700;
+}
+
+.resultado__detalhes,
+.resultado__coordenadas {
+	display: block;
+	font-size: 0.875rem;
+	color: var(--chuva);
+}
