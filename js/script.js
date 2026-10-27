@@ -87,12 +87,21 @@ function pesquisarCidades(nome) {
 				throw new Error('Resposta inesperada da API de geocodificação');
 			}
 
-			exibirResultados(resultados.map(criarLocal));
+			// Só aproveita localidades que vieram com coordenadas válidas,
+			// pois sem elas não é possível consultar o tempo
+			const locais = resultados
+				.filter(function (resultado) {
+					return typeof resultado.latitude === 'number'
+						&& typeof resultado.longitude === 'number';
+				})
+				.map(criarLocal);
 
-			if (resultados.length === 0) {
+			exibirResultados(locais);
+
+			if (locais.length === 0) {
 				atualizarMensagem(`Nenhuma localidade encontrada para "${nome}". Confira a grafia e tente novamente.`, 'info');
 			} else {
-				atualizarMensagem(`${resultados.length} localidade(s) encontrada(s). Selecione a cidade desejada.`, 'sucesso');
+				atualizarMensagem(`${locais.length} localidade(s) encontrada(s). Selecione a cidade desejada.`, 'sucesso');
 			}
 		})
 		.catch(function (erro) {

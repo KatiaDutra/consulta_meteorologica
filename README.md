@@ -1,4 +1,4 @@
-# Consulta do Tempo
+# Consulta do Tempo 🌦️
 
 Aplicação web de consulta meteorológica desenvolvida como projeto do **Curso de Desenvolvimento Front-end** do **Programa de Formação Acelerada – Bolsa Futuro Digital** (Instituto Hardware BR, Softex, MCTI, IFRS e IFSul – Câmpus Charqueadas).
 
@@ -37,6 +37,7 @@ A descrição do tempo é gerada a partir dos códigos WMO retornados pela API.
 consulta_meteorologica/
 ├── index.html
 ├── README.md
+├── TESTES.md
 ├── css/
 │   └── style.css
 └── js/
@@ -55,6 +56,10 @@ Não é necessário instalar nada.
 
 Também é possível usar a extensão **Live Server** do VS Code para recarregar a página automaticamente durante o desenvolvimento.
 
+## Testes
+
+O roteiro dos 13 cenários de teste do enunciado, com o passo a passo e o resultado esperado de cada um, está em [TESTES.md](TESTES.md).
+
 ## Andamento
 
 O projeto está sendo desenvolvido em etapas:
@@ -63,7 +68,7 @@ O projeto está sendo desenvolvido em etapas:
 - [x] Etapa 2 – Pesquisa de cidades (geocodificação)
 - [x] Etapa 3 – Condições atuais e previsão de 5 dias
 - [x] Etapa 4 – Cidades favoritas com `localStorage`
-- [ ] Etapa 5 – Revisão e cenários de teste
+- [x] Etapa 5 – Revisão e cenários de teste
 
 ## Créditos
 
