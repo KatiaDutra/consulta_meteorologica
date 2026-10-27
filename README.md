@@ -1,4 +1,4 @@
-# Consulta do Tempo 🌦️
+# Consulta do Tempo
 
 Aplicação web de consulta meteorológica desenvolvida como projeto do **Curso de Desenvolvimento Front-end** do **Programa de Formação Acelerada – Bolsa Futuro Digital** (Instituto Hardware BR, Softex, MCTI, IFRS e IFSul – Câmpus Charqueadas).
 
@@ -62,7 +62,7 @@ O projeto está sendo desenvolvido em etapas:
 - [x] Etapa 1 – Estrutura HTML e CSS base
 - [x] Etapa 2 – Pesquisa de cidades (geocodificação)
 - [x] Etapa 3 – Condições atuais e previsão de 5 dias
-- [ ] Etapa 4 – Cidades favoritas com `localStorage`
+- [x] Etapa 4 – Cidades favoritas com `localStorage`
 - [ ] Etapa 5 – Revisão e cenários de teste
 
 ## Créditos

@@ -21,6 +21,13 @@ let cidadeSelecionada = null;
 // (ex.: o usuário clicou em outra cidade antes da primeira responder)
 let numeroConsultaAtual = 0;
 
+// Cidade cujos dados estão aparecendo no painel (null = nenhuma)
+let cidadeExibida = null;
+
+// Chave usada no localStorage e lista de favoritos em memória
+const CHAVE_FAVORITOS = 'consulta-tempo:favoritos';
+let favoritos = [];
+
 // =========================================================
 // Mensagens de estado
 // tipo: 'info', 'carregando', 'sucesso' ou 'erro'
@@ -273,6 +280,7 @@ function consultarClima(local) {
 	});
 
 	// Remove os dados da cidade anterior antes de mostrar os novos
+	cidadeExibida = null;
 	mostrarVazio(areaTempoAtual, `Carregando o tempo em ${local.nome}...`);
 	mostrarVazio(areaPrevisao, 'Carregando a previsão...');
 	atualizarMensagem(`Carregando as condições meteorológicas de ${local.nome}...`, 'carregando');
@@ -350,7 +358,23 @@ function exibirTempoAtual(local, atual, unidades) {
 		criarDetalhe('Vento', formatarValor(atual.wind_speed_10m, unidades.wind_speed_10m))
 	);
 
-	painel.append(cidade, regiao, temperatura, condicao, detalhes);
+	// Botão de favorito, associado à cidade exibida no painel
+	const botaoFavorito = document.createElement('button');
+	botaoFavorito.type = 'button';
+	botaoFavorito.id = 'botao-favorito';
+	botaoFavorito.className = 'botao-favorito';
+	botaoFavorito.addEventListener('click', function () {
+		adicionarFavorito(local);
+	});
+
+	// Linha do topo: nome e região à esquerda, botão à direita
+	const identificacao = document.createElement('div');
+	identificacao.append(cidade, regiao);
+	const topo = document.createElement('div');
+	topo.className = 'atual__topo';
+	topo.append(identificacao, botaoFavorito);
+
+	painel.append(topo, temperatura, condicao, detalhes);
 
 	// Horário da medição, no fuso da cidade (ex.: "2026-10-27T14:15")
 	if (typeof atual.time === 'string' && atual.time.includes('T')) {
@@ -361,6 +385,9 @@ function exibirTempoAtual(local, atual, unidades) {
 	}
 
 	areaTempoAtual.replaceChildren(painel);
+
+	cidadeExibida = local;
+	atualizarBotaoFavorito();
 }
 
 // Monta os cartões da previsão diária
@@ -404,3 +431,157 @@ function exibirPrevisao(diario, unidades) {
 
 	areaPrevisao.replaceChildren(lista);
 }
+
+// =========================================================
+// Etapa 4 – Cidades favoritas (localStorage)
+// =========================================================
+
+// Verifica se um item lido do localStorage tem o formato esperado
+function localValido(item) {
+	return item !== null
+		&& typeof item === 'object'
+		&& typeof item.nome === 'string'
+		&& typeof item.latitude === 'number'
+		&& typeof item.longitude === 'number';
+}
+
+// Duas localidades são a mesma quando têm o mesmo id e as mesmas coordenadas
+function mesmoLocal(a, b) {
+	return a.id === b.id
+		&& a.latitude === b.latitude
+		&& a.longitude === b.longitude;
+}
+
+function ehFavorito(local) {
+	return favoritos.some(function (favorito) {
+		return mesmoLocal(favorito, local);
+	});
+}
+
+// Lê os favoritos salvos; se não houver ou estiverem inválidos, começa vazio
+function carregarFavoritos() {
+	try {
+		const texto = localStorage.getItem(CHAVE_FAVORITOS);
+		if (texto === null) {
+			return []; // primeira vez: nada salvo ainda
+		}
+
+		const dados = JSON.parse(texto); // pode lançar erro se o texto estiver corrompido
+		if (!Array.isArray(dados)) {
+			throw new Error('Favoritos salvos em formato inválido');
+		}
+
+		// Descarta itens que não tenham os dados mínimos
+		return dados.filter(localValido);
+	} catch (erro) {
+		console.warn('Favoritos salvos foram ignorados:', erro);
+		return [];
+	}
+}
+
+// Grava a lista atual no localStorage
+function salvarFavoritos() {
+	try {
+		localStorage.setItem(CHAVE_FAVORITOS, JSON.stringify(favoritos));
+		return true;
+	} catch (erro) {
+		// Ex.: navegador com armazenamento bloqueado ou cheio
+		console.error(erro);
+		atualizarMensagem('Não foi possível salvar os favoritos neste navegador.', 'erro');
+		return false;
+	}
+}
+
+function adicionarFavorito(local) {
+	if (ehFavorito(local)) {
+		atualizarMensagem(`${local.nome} já está nos favoritos.`, 'info');
+		return;
+	}
+
+	favoritos.push({ ...local }); // guarda uma cópia do objeto
+	exibirFavoritos();
+	atualizarBotaoFavorito();
+
+	if (salvarFavoritos()) {
+		atualizarMensagem(`${local.nome} foi adicionada aos favoritos.`, 'sucesso');
+	}
+}
+
+function removerFavorito(local) {
+	favoritos = favoritos.filter(function (favorito) {
+		return !mesmoLocal(favorito, local);
+	});
+	exibirFavoritos();
+	atualizarBotaoFavorito();
+
+	if (salvarFavoritos()) {
+		atualizarMensagem(`${local.nome} foi removida dos favoritos.`, 'info');
+	}
+}
+
+// Ajusta o botão do painel conforme a cidade exibida já ser favorita ou não
+function atualizarBotaoFavorito() {
+	const botao = document.getElementById('botao-favorito');
+	if (!botao || !cidadeExibida) {
+		return;
+	}
+
+	const jaFavorita = ehFavorito(cidadeExibida);
+	botao.disabled = jaFavorita;
+	botao.textContent = jaFavorita ? '★ Nos favoritos' : '☆ Adicionar aos favoritos';
+}
+
+// Desenha a lista de favoritos na tela
+function exibirFavoritos() {
+	if (favoritos.length === 0) {
+		mostrarVazio(areaFavoritos, 'Nenhuma cidade favorita ainda. Consulte uma cidade e use o botão "Adicionar aos favoritos".');
+		return;
+	}
+
+	const lista = document.createElement('ul');
+	lista.className = 'lista-favoritos';
+
+	favoritos.forEach(function (local) {
+		const item = document.createElement('li');
+		item.className = 'favorito';
+
+		// Botão principal: consulta o tempo da cidade favorita
+		const botaoConsultar = document.createElement('button');
+		botaoConsultar.type = 'button';
+		botaoConsultar.className = 'resultado favorito__consultar';
+
+		const nome = document.createElement('span');
+		nome.className = 'resultado__nome';
+		nome.textContent = local.nome;
+
+		const detalhes = document.createElement('span');
+		detalhes.className = 'resultado__detalhes';
+		detalhes.textContent = descreverLocal(local) || 'Região não informada';
+
+		botaoConsultar.append(nome, detalhes);
+		botaoConsultar.addEventListener('click', function () {
+			// Usa as coordenadas salvas, sem pesquisar o nome de novo
+			selecionarCidade(local, null);
+		});
+
+		const botaoRemover = document.createElement('button');
+		botaoRemover.type = 'button';
+		botaoRemover.className = 'favorito__remover';
+		botaoRemover.textContent = 'Remover';
+		botaoRemover.setAttribute('aria-label', `Remover ${local.nome} dos favoritos`);
+		botaoRemover.addEventListener('click', function () {
+			removerFavorito(local);
+		});
+
+		item.append(botaoConsultar, botaoRemover);
+		lista.appendChild(item);
+	});
+
+	areaFavoritos.replaceChildren(lista);
+}
+
+// =========================================================
+// Inicialização: recupera os favoritos ao abrir a página
+// =========================================================
+favoritos = carregarFavoritos();
+exibirFavoritos();

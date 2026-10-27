@@ -338,3 +338,71 @@ dd {
 	justify-content: space-between;
 	column-gap: 0.5rem;
 }
+
+/* =========================================================
+   Etapa 4 – Favoritos
+   ========================================================= */
+.atual__topo {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 0.5rem 1rem;
+}
+
+.botao-favorito {
+	padding: 0.45rem 0.75rem;
+	font: inherit;
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: var(--tinta);
+	background-color: #fff;
+	border: 2px solid var(--sol);
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.botao-favorito:hover {
+	background-color: #FDF3DC;
+}
+
+/* Cidade já favorita: o botão fica preenchido em amarelo e sem ação */
+.botao-favorito:disabled {
+	background-color: var(--sol);
+	cursor: default;
+}
+
+.lista-favoritos {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.favorito {
+	display: flex;
+	gap: 0.25rem;
+}
+
+.favorito__consultar {
+	flex: 1;
+	min-width: 0;
+	border-left: 4px solid var(--sol);
+}
+
+.favorito__remover {
+	padding: 0 0.75rem;
+	font: inherit;
+	font-size: 0.875rem;
+	color: var(--erro);
+	background-color: transparent;
+	border: 2px solid transparent;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.favorito__remover:hover {
+	border-color: var(--erro);
+}
