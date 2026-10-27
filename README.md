@@ -4,6 +4,8 @@ Aplicação web de consulta meteorológica desenvolvida como projeto do **Curso 
 
 A aplicação permite pesquisar cidades, consultar as condições meteorológicas atuais e a previsão para os próximos cinco dias, além de manter uma lista de cidades favoritas salva no próprio navegador.
 
+🔗 **Acesse a aplicação:** https://katiadutra.github.io/consulta_meteorologica/
+
 ## Funcionalidades
 
 - Pesquisa de cidades pelo nome, com lista de resultados para escolher a localidade correta (cidade, estado e país)
@@ -12,6 +14,8 @@ A aplicação permite pesquisar cidades, consultar as condições meteorológica
 - Lista de cidades favoritas, com inclusão, remoção e consulta rápida
 - Favoritos salvos no `localStorage`, mantidos ao atualizar a página
 - Mensagens de estado na interface: aguardando pesquisa, carregando, sucesso, nenhum resultado e erros
+- Painel e previsão com cores e ícones que mudam conforme o tempo (sol, nuvens, chuva, tempestade, noite)
+- Layout responsivo: no celular, a lista de localidades encolhe após a escolha e a tela rola até o resultado
 
 ## Tecnologias
 
@@ -46,7 +50,10 @@ consulta_meteorologica/
 
 ## Como executar
 
-Não é necessário instalar nada.
+A forma mais simples é acessar a versão publicada no GitHub Pages:
+https://katiadutra.github.io/consulta_meteorologica/
+
+Para executar localmente, não é necessário instalar nada:
 
 1. Clone o repositório:
    ```bash
@@ -60,15 +67,16 @@ Também é possível usar a extensão **Live Server** do VS Code para recarregar
 
 O roteiro dos 13 cenários de teste do enunciado, com o passo a passo e o resultado esperado de cada um, está em [TESTES.md](TESTES.md).
 
-## Andamento
+## Etapas de desenvolvimento
 
-O projeto está sendo desenvolvido em etapas:
+O projeto foi desenvolvido em etapas, registradas no histórico de commits:
 
 - [x] Etapa 1 – Estrutura HTML e CSS base
 - [x] Etapa 2 – Pesquisa de cidades (geocodificação)
 - [x] Etapa 3 – Condições atuais e previsão de 5 dias
 - [x] Etapa 4 – Cidades favoritas com `localStorage`
 - [x] Etapa 5 – Revisão e cenários de teste
+- [x] Melhorias – responsividade, cores e ícones conforme o tempo e seleção de localidades no celular
 
 ## Créditos
 
