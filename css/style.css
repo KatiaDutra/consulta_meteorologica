@@ -242,3 +242,99 @@ h1, h2, h3, p {
 	font-size: 0.875rem;
 	color: var(--chuva);
 }
+
+/* =========================================================
+   Etapa 3 – Painel do tempo atual
+   ========================================================= */
+.atual__cidade {
+	font-size: 1.5rem;
+	line-height: 1.2;
+}
+
+.atual__regiao {
+	color: var(--chuva);
+}
+
+/* A temperatura é o elemento de maior destaque da página */
+.atual__temperatura {
+	margin-top: 0.75rem;
+	font-size: 4.5rem;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -0.03em;
+}
+
+.atual__condicao {
+	margin-top: 0.25rem;
+	font-size: 1.2rem;
+}
+
+.atual__detalhes {
+	margin: 1rem 0 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: 0.5rem;
+}
+
+.atual__detalhes div {
+	padding: 0.5rem 0.75rem;
+	background-color: var(--ceu);
+	border-radius: 6px;
+}
+
+dt {
+	font-size: 0.875rem;
+	color: var(--chuva);
+}
+
+dd {
+	margin: 0;
+	font-weight: 700;
+}
+
+.atual__horario {
+	margin-top: 0.75rem;
+	font-size: 0.875rem;
+	color: var(--chuva);
+}
+
+/* =========================================================
+   Etapa 3 – Cartões da previsão
+   ========================================================= */
+.lista-previsao {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+	gap: 0.5rem;
+}
+
+.dia {
+	padding: 0.75rem;
+	background-color: #fff;
+	border-radius: 6px;
+}
+
+.dia__data {
+	font-size: 1rem;
+}
+
+.dia__condicao {
+	min-height: 3em; /* alinha os cartões mesmo com descrições de tamanhos diferentes */
+	margin-top: 0.25rem;
+}
+
+.dia__detalhes {
+	margin: 0.5rem 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.dia__detalhes div {
+	display: flex;
+	flex-wrap: wrap; /* "Não informado" quebra a linha em vez de apertar */
+	justify-content: space-between;
+	column-gap: 0.5rem;
+}

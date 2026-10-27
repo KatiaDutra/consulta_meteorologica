@@ -61,7 +61,7 @@ O projeto está sendo desenvolvido em etapas:
 
 - [x] Etapa 1 – Estrutura HTML e CSS base
 - [x] Etapa 2 – Pesquisa de cidades (geocodificação)
-- [ ] Etapa 3 – Condições atuais e previsão de 5 dias
+- [x] Etapa 3 – Condições atuais e previsão de 5 dias
 - [ ] Etapa 4 – Cidades favoritas com `localStorage`
 - [ ] Etapa 5 – Revisão e cenários de teste
 
