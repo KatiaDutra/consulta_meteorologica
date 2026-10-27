@@ -22,7 +22,8 @@ body {
 	font-size: 1rem;
 	line-height: 1.5;
 	color: var(--tinta);
-	background-color: var(--ceu);
+	/* Degradê de céu no topo, que termina na cor de fundo */
+	background: linear-gradient(180deg, #B9D4EA 0, var(--ceu) 420px) no-repeat, var(--ceu);
 }
 
 h1, h2, h3, p {
@@ -41,7 +42,8 @@ h1, h2, h3, p {
 }
 
 .cabecalho__titulo {
-	font-size: 2.25rem;
+	/* clamp(mínimo, ideal, máximo): o tamanho acompanha a largura da tela */
+	font-size: clamp(1.75rem, 4vw + 1rem, 2.5rem);
 	line-height: 1.1;
 	letter-spacing: -0.02em;
 }
@@ -55,23 +57,41 @@ h1, h2, h3, p {
 	max-width: 1100px;
 	margin: 0 auto;
 	padding: 0 var(--espaco) calc(var(--espaco) * 2);
-	display: grid;
-	grid-template-columns: 1fr;
-	gap: var(--espaco);
-}
-
-@media (min-width: 800px) {
-	.layout {
-		grid-template-columns: 340px 1fr;
-		align-items: start;
-	}
-}
-
-.coluna {
 	display: flex;
 	flex-direction: column;
 	gap: var(--espaco);
-	min-width: 0; 
+}
+
+/* No celular as colunas "somem" (display: contents) e as áreas
+   viram uma fila única, que pode ser reordenada com "order".
+   Assim o tempo aparece logo depois dos resultados da pesquisa,
+   em vez de ficar lá embaixo, depois dos favoritos. */
+.coluna {
+	display: contents;
+}
+
+#area-busca       { order: 1; }
+#mensagem         { order: 2; }
+#area-resultados  { order: 3; }
+#area-atual       { order: 4; }
+#area-previsao    { order: 5; }
+#area-favoritos   { order: 6; }
+
+/* Telas a partir de 800px: duas colunas lado a lado */
+@media (min-width: 800px) {
+	.layout {
+		display: grid;
+		/* coluna da busca entre 280px e 340px; o resto fica para o clima */
+		grid-template-columns: minmax(280px, 340px) 1fr;
+		align-items: start;
+	}
+
+	.coluna {
+		display: flex;
+		flex-direction: column;
+		gap: var(--espaco);
+		min-width: 0; /* evita que conteúdo largo estoure a coluna */
+	}
 }
 
 .area {
@@ -258,7 +278,7 @@ h1, h2, h3, p {
 /* A temperatura é o elemento de maior destaque da página */
 .atual__temperatura {
 	margin-top: 0.75rem;
-	font-size: 4.5rem;
+	font-size: clamp(3.25rem, 10vw + 1rem, 4.5rem);
 	font-weight: 700;
 	line-height: 1;
 	letter-spacing: -0.03em;
@@ -272,7 +292,7 @@ h1, h2, h3, p {
 .atual__detalhes {
 	margin: 1rem 0 0;
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	grid-template-columns: repeat(3, minmax(0, 1fr)); /* sempre 3 lado a lado */
 	gap: 0.5rem;
 }
 
@@ -405,4 +425,190 @@ dd {
 
 .favorito__remover:hover {
 	border-color: var(--erro);
+}
+
+/* =========================================================
+   Responsividade
+   ========================================================= */
+
+/* Alvos de toque com pelo menos 44px de altura (recomendação de acessibilidade) */
+.botao,
+.busca__campo,
+.botao-favorito,
+.favorito__remover {
+	min-height: 44px;
+}
+
+/* A área da previsão vira um "container": os cartões se adaptam à
+   largura da própria área, e não à largura da tela inteira.
+   Isso resolve tanto o celular quanto o tablet, em que a coluna
+   do clima fica estreita mesmo com a tela larga. */
+#area-previsao {
+	container-type: inline-size;
+}
+
+/* Quando a área tem menos de 600px, os 5 cartões não cabem lado a lado:
+   cada dia vira uma faixa, com a data e a condição em cima
+   e mínima, máxima e chuva em três colunas embaixo */
+@container (max-width: 599px) {
+	.lista-previsao {
+		grid-template-columns: 1fr;
+	}
+
+	.dia {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		column-gap: 0.75rem;
+		align-items: baseline;
+	}
+
+	.dia__condicao {
+		min-height: 0;
+		margin-top: 0;
+		text-align: right;
+	}
+
+	.dia__detalhes {
+		grid-column: 1 / -1; /* ocupa a linha inteira */
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.5rem;
+	}
+
+	.dia__detalhes div {
+		flex-direction: column;
+	}
+}
+
+/* Celulares estreitos: painéis e blocos de detalhe um pouco mais compactos */
+@media (max-width: 400px) {
+	.area {
+		padding: 0.75rem;
+	}
+
+	.atual__detalhes div {
+		padding: 0.5rem;
+	}
+}
+
+/* =========================================================
+   Cores do tempo: ícones e temas do painel
+   ========================================================= */
+
+/* Temperatura e ícone na mesma linha */
+.atual__principal {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-top: 0.75rem;
+}
+
+.atual__principal .atual__temperatura {
+	margin-top: 0;
+}
+
+.atual__icone {
+	font-size: clamp(2.75rem, 8vw + 1rem, 4rem);
+	line-height: 1;
+}
+
+/* Cada tema define as cores por variáveis; o painel só as usa */
+.area--destaque {
+	--tema-fundo: var(--nuvem);
+	--tema-borda: var(--tinta);
+	--tema-texto: var(--tinta);
+	--tema-suave: var(--chuva);
+	--tema-bloco: var(--ceu);
+
+	background: var(--tema-fundo);
+	border-top-color: var(--tema-borda);
+	color: var(--tema-texto);
+}
+
+.area--destaque .atual__regiao,
+.area--destaque .atual__horario,
+.area--destaque dt {
+	color: var(--tema-suave);
+}
+
+.area--destaque .atual__detalhes div {
+	background-color: var(--tema-bloco);
+}
+
+.tema-sol {
+	--tema-fundo: linear-gradient(160deg, #FFE3A1 0%, #FFF5D9 50%, var(--nuvem) 100%);
+	--tema-borda: var(--sol);
+	--tema-suave: #7A5A12;
+	--tema-bloco: rgba(255, 255, 255, 0.6);
+}
+
+.tema-nuvens {
+	--tema-fundo: linear-gradient(160deg, #CBD6E2 0%, #E8EEF4 50%, var(--nuvem) 100%);
+	--tema-borda: #7F93A8;
+	--tema-bloco: rgba(255, 255, 255, 0.6);
+}
+
+.tema-nevoeiro {
+	--tema-fundo: linear-gradient(160deg, #D9DCDF 0%, #EEF0F1 50%, var(--nuvem) 100%);
+	--tema-borda: #9AA1A8;
+	--tema-bloco: rgba(255, 255, 255, 0.65);
+}
+
+.tema-chuva {
+	--tema-fundo: linear-gradient(160deg, #A9C9EA 0%, #DCEAF7 50%, var(--nuvem) 100%);
+	--tema-borda: #2F6FB0;
+	--tema-suave: #2E5878;
+	--tema-bloco: rgba(255, 255, 255, 0.6);
+}
+
+.tema-neve {
+	--tema-fundo: linear-gradient(160deg, #D4ECFA 0%, #F0F8FD 50%, #fff 100%);
+	--tema-borda: #8CC3E3;
+	--tema-bloco: rgba(255, 255, 255, 0.75);
+}
+
+/* Temas escuros: texto claro sobre fundo escuro */
+.tema-tempestade {
+	--tema-fundo: linear-gradient(160deg, #2E3260 0%, #4A4F85 100%);
+	--tema-borda: #F2C94C;
+	--tema-texto: #F5F6FF;
+	--tema-suave: #CDD0F2;
+	--tema-bloco: rgba(255, 255, 255, 0.12);
+}
+
+.tema-noite {
+	--tema-fundo: linear-gradient(160deg, #18264A 0%, #2F4478 100%);
+	--tema-borda: #B9A8FF;
+	--tema-texto: #F2F5FF;
+	--tema-suave: #C3CDEA;
+	--tema-bloco: rgba(255, 255, 255, 0.1);
+}
+
+/* Cartões da previsão: faixa colorida no topo conforme o tempo do dia */
+.dia {
+	border-top: 5px solid #C9D5E0;
+}
+
+.dia--sol        { border-top-color: var(--sol); }
+.dia--nuvens     { border-top-color: #9AABBC; }
+.dia--nevoeiro   { border-top-color: #B3B9BF; }
+.dia--chuva      { border-top-color: #3D7CC0; }
+.dia--neve       { border-top-color: #9CCDEB; }
+.dia--tempestade { border-top-color: #5A4FA8; }
+
+/* No cartão, o ícone fica grande e numa linha própria */
+.dia__icone {
+	display: block;
+	margin-bottom: 0.15rem;
+	font-size: 1.75rem;
+	line-height: 1.2;
+}
+
+/* Na versão em faixas (área estreita), o ícone fica ao lado do texto */
+@container (max-width: 599px) {
+	.dia__icone {
+		display: inline;
+		margin-right: 0.35rem;
+		font-size: 1.25rem;
+	}
 }

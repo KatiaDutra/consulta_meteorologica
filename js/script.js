@@ -248,6 +248,55 @@ function descreverCodigo(codigo) {
 	return CODIGOS_TEMPO[codigo] || `Condição desconhecida (código ${codigo})`;
 }
 
+// Agrupa os códigos WMO em "climas" para escolher cor e ícone.
+// ehDia: false quando já é noite na cidade (campo is_day da API)
+function classificarTempo(codigo, ehDia) {
+	if (codigo === null || codigo === undefined) {
+		return { grupo: null, icone: '🌡️' };
+	}
+	if (codigo <= 1) {
+		return ehDia ? { grupo: 'sol', icone: codigo === 0 ? '☀️' : '🌤️' } : { grupo: 'noite', icone: '🌙' };
+	}
+	if (codigo <= 3) {
+		return ehDia ? { grupo: 'nuvens', icone: codigo === 2 ? '⛅' : '☁️' } : { grupo: 'noite', icone: '☁️' };
+	}
+	if (codigo === 45 || codigo === 48) {
+		return { grupo: 'nevoeiro', icone: '🌫️' };
+	}
+	if (codigo >= 51 && codigo <= 57) {
+		return { grupo: 'chuva', icone: '🌦️' };
+	}
+	if ((codigo >= 61 && codigo <= 67) || (codigo >= 80 && codigo <= 82)) {
+		return { grupo: 'chuva', icone: '🌧️' };
+	}
+	if ((codigo >= 71 && codigo <= 77) || codigo === 85 || codigo === 86) {
+		return { grupo: 'neve', icone: '❄️' };
+	}
+	if (codigo >= 95) {
+		return { grupo: 'tempestade', icone: '⛈️' };
+	}
+	return { grupo: null, icone: '🌡️' };
+}
+
+// Troca a cor do painel "Tempo agora" (null volta ao visual padrão)
+function aplicarTema(grupo) {
+	const painel = document.getElementById('area-atual');
+	painel.className = 'area area--destaque';
+	if (grupo) {
+		painel.classList.add(`tema-${grupo}`);
+	}
+}
+
+// Cria o ícone do tempo; aria-hidden evita que leitores de tela
+// leiam o emoji, já que a descrição em texto aparece ao lado
+function criarIcone(icone, classe) {
+	const span = document.createElement('span');
+	span.className = classe;
+	span.setAttribute('aria-hidden', 'true');
+	span.textContent = icone;
+	return span;
+}
+
 // Formata um número com unidade; se o valor não veio da API, avisa
 function formatarValor(valor, unidade) {
 	if (typeof valor !== 'number' || Number.isNaN(valor)) {
@@ -282,7 +331,7 @@ function consultarClima(local) {
 	const parametros = new URLSearchParams({
 		latitude: local.latitude,
 		longitude: local.longitude,
-		current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m',
+		current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day',
 		daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
 		timezone: 'auto', // datas e horários no fuso da cidade
 		forecast_days: 5
@@ -290,6 +339,7 @@ function consultarClima(local) {
 
 	// Remove os dados da cidade anterior antes de mostrar os novos
 	cidadeExibida = null;
+	aplicarTema(null);
 	mostrarVazio(areaTempoAtual, `Carregando o tempo em ${local.nome}...`);
 	mostrarVazio(areaPrevisao, 'Carregando a previsão...');
 	atualizarMensagem(`Carregando as condições meteorológicas de ${local.nome}...`, 'carregando');
@@ -383,7 +433,14 @@ function exibirTempoAtual(local, atual, unidades) {
 	topo.className = 'atual__topo';
 	topo.append(identificacao, botaoFavorito);
 
-	painel.append(topo, temperatura, condicao, detalhes);
+	// Temperatura com o ícone ao lado
+	const clima = classificarTempo(atual.weather_code, atual.is_day !== 0);
+	const principal = document.createElement('div');
+	principal.className = 'atual__principal';
+	principal.append(temperatura, criarIcone(clima.icone, 'atual__icone'));
+
+	painel.append(topo, principal, condicao, detalhes);
+	aplicarTema(clima.grupo);
 
 	// Horário da medição, no fuso da cidade (ex.: "2026-10-27T14:15")
 	if (typeof atual.time === 'string' && atual.time.includes('T')) {
@@ -416,7 +473,13 @@ function exibirPrevisao(diario, unidades) {
 
 	diario.time.slice(0, 5).forEach(function (data, i) {
 		const cartao = document.createElement('li');
+		const codigoDoDia = valorDoDia(diario.weather_code, i);
+		const climaDoDia = classificarTempo(codigoDoDia, true);
+
 		cartao.className = 'dia';
+		if (climaDoDia.grupo) {
+			cartao.classList.add(`dia--${climaDoDia.grupo}`);
+		}
 
 		const titulo = document.createElement('h3');
 		titulo.className = 'dia__data';
@@ -424,7 +487,10 @@ function exibirPrevisao(diario, unidades) {
 
 		const condicao = document.createElement('p');
 		condicao.className = 'dia__condicao';
-		condicao.textContent = descreverCodigo(valorDoDia(diario.weather_code, i));
+		condicao.append(
+			criarIcone(climaDoDia.icone, 'dia__icone'),
+			document.createTextNode(descreverCodigo(codigoDoDia))
+		);
 
 		const detalhes = document.createElement('dl');
 		detalhes.className = 'dia__detalhes';
