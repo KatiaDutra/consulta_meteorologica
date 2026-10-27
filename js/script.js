@@ -17,6 +17,9 @@ const URL_PREVISAO = 'https://api.open-meteo.com/v1/forecast';
 // Guarda a localidade escolhida pelo usuário (null = nenhuma ainda)
 let cidadeSelecionada = null;
 
+// Última lista de localidades encontradas na pesquisa
+let ultimosResultados = [];
+
 // Conta as consultas de clima para ignorar respostas antigas
 // (ex.: o usuário clicou em outra cidade antes da primeira responder)
 let numeroConsultaAtual = 0;
@@ -143,8 +146,39 @@ function mostrarVazio(area, texto) {
 	area.replaceChildren(paragrafo);
 }
 
-// Cria a lista de localidades na tela
+// Cria o botão de uma localidade (nome, região e coordenadas)
+function criarBotaoLocal(local, selecionado) {
+	const botao = document.createElement('button');
+	botao.type = 'button';
+	botao.className = 'resultado';
+	botao.setAttribute('aria-pressed', selecionado ? 'true' : 'false');
+
+	const nome = document.createElement('span');
+	nome.className = 'resultado__nome';
+	nome.textContent = local.nome;
+
+	const detalhes = document.createElement('span');
+	detalhes.className = 'resultado__detalhes';
+	detalhes.textContent = descreverLocal(local) || 'Região não informada';
+
+	// Coordenadas ajudam a diferenciar cidades com o mesmo nome
+	const coordenadas = document.createElement('span');
+	coordenadas.className = 'resultado__coordenadas';
+	coordenadas.textContent = `Lat. ${local.latitude.toFixed(2)}, long. ${local.longitude.toFixed(2)}`;
+
+	botao.append(nome, detalhes, coordenadas);
+
+	botao.addEventListener('click', function () {
+		selecionarCidade(local, true);
+	});
+
+	return botao;
+}
+
+// Cria a lista completa de localidades na tela
 function exibirResultados(locais) {
+	ultimosResultados = locais; // guarda para poder mostrar a lista de novo
+
 	if (locais.length === 0) {
 		mostrarVazio(areaResultados, 'Nenhuma localidade encontrada.');
 		return;
@@ -154,54 +188,84 @@ function exibirResultados(locais) {
 	lista.className = 'lista-resultados';
 
 	locais.forEach(function (local) {
+		const selecionado = cidadeSelecionada !== null && mesmoLocal(local, cidadeSelecionada);
 		const item = document.createElement('li');
-
-		const botao = document.createElement('button');
-		botao.type = 'button';
-		botao.className = 'resultado';
-		botao.setAttribute('aria-pressed', 'false');
-
-		const nome = document.createElement('span');
-		nome.className = 'resultado__nome';
-		nome.textContent = local.nome;
-
-		const detalhes = document.createElement('span');
-		detalhes.className = 'resultado__detalhes';
-		detalhes.textContent = descreverLocal(local) || 'Região não informada';
-
-		// Coordenadas ajudam a diferenciar cidades com o mesmo nome
-		const coordenadas = document.createElement('span');
-		coordenadas.className = 'resultado__coordenadas';
-		coordenadas.textContent = `Lat. ${local.latitude.toFixed(2)}, long. ${local.longitude.toFixed(2)}`;
-
-		botao.append(nome, detalhes, coordenadas);
-
-		botao.addEventListener('click', function () {
-			selecionarCidade(local, botao);
-		});
-
-		item.appendChild(botao);
+		item.appendChild(criarBotaoLocal(local, selecionado));
 		lista.appendChild(item);
 	});
 
 	areaResultados.replaceChildren(lista);
 }
 
-// Registra a localidade escolhida e destaca o botão clicado
-function selecionarCidade(local, botaoClicado) {
+// Depois da escolha, mostra só a localidade selecionada e um link
+// para voltar à lista, caso o usuário queira trocar
+function mostrarApenasSelecionada(local) {
+	const lista = document.createElement('ul');
+	lista.className = 'lista-resultados';
+	const item = document.createElement('li');
+	const botaoEscolhido = criarBotaoLocal(local, true);
+	item.appendChild(botaoEscolhido);
+	lista.appendChild(item);
+	areaResultados.replaceChildren(lista);
+
+	const outras = ultimosResultados.length - 1;
+	if (outras > 0) {
+		const botaoOutras = document.createElement('button');
+		botaoOutras.type = 'button';
+		botaoOutras.className = 'botao-link';
+		botaoOutras.textContent = outras === 1
+			? 'Ver a outra localidade encontrada'
+			: `Ver as outras ${outras} localidades encontradas`;
+
+		botaoOutras.addEventListener('click', function () {
+			exibirResultados(ultimosResultados);
+			// Leva o foco do teclado para a localidade que estava escolhida
+			const marcado = areaResultados.querySelector('.resultado[aria-pressed="true"]');
+			if (marcado) {
+				marcado.focus();
+			}
+		});
+
+		areaResultados.appendChild(botaoOutras);
+	}
+
+	// O botão clicado foi recriado; o foco vai para o novo,
+	// sem rolar a tela (a rolagem é feita por levarAoPainel)
+	botaoEscolhido.focus({ preventScroll: true });
+}
+
+// No celular, rola a tela até o painel do tempo
+function levarAoPainel() {
+	// No computador o painel já fica visível, ao lado dos resultados
+	if (!window.matchMedia('(max-width: 799px)').matches) {
+		return;
+	}
+	const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	document.getElementById('area-atual').scrollIntoView({
+		behavior: reduzirMovimento ? 'auto' : 'smooth',
+		block: 'start'
+	});
+}
+
+// Registra a localidade escolhida e inicia a consulta do tempo.
+// veioDaPesquisa: true quando o clique foi na lista de resultados,
+// false quando foi na lista de favoritos
+function selecionarCidade(local, veioDaPesquisa) {
 	cidadeSelecionada = local;
 
-	// Remove o destaque dos outros resultados
-	areaResultados.querySelectorAll('.resultado').forEach(function (botao) {
-		botao.setAttribute('aria-pressed', 'false');
-	});
-	if (botaoClicado) {
-		botaoClicado.setAttribute('aria-pressed', 'true');
+	if (veioDaPesquisa) {
+		mostrarApenasSelecionada(local);
+	} else {
+		// Escolha pelos favoritos: só tira o destaque dos resultados
+		areaResultados.querySelectorAll('.resultado').forEach(function (botao) {
+			botao.setAttribute('aria-pressed', 'false');
+		});
 	}
 
 	// A segunda requisição só acontece aqui, depois que a primeira
 	// (geocodificação) já forneceu as coordenadas da cidade
 	consultarClima(local);
+	levarAoPainel();
 }
 
 // =========================================================
@@ -636,7 +700,7 @@ function exibirFavoritos() {
 		botaoConsultar.append(nome, detalhes);
 		botaoConsultar.addEventListener('click', function () {
 			// Usa as coordenadas salvas, sem pesquisar o nome de novo
-			selecionarCidade(local, null);
+			selecionarCidade(local, false);
 		});
 
 		const botaoRemover = document.createElement('button');
