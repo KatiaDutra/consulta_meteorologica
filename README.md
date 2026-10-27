@@ -1,4 +1,4 @@
-# Consulta do Tempo 🌦️
+# Consulta do Tempo
 
 Aplicação web de consulta meteorológica desenvolvida como projeto do **Curso de Desenvolvimento Front-end** do **Programa de Formação Acelerada – Bolsa Futuro Digital** (Instituto Hardware BR, Softex, MCTI, IFRS e IFSul – Câmpus Charqueadas).
 
